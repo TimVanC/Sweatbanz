@@ -113,9 +113,9 @@ export const dossier: Dossier = {
       },
     ],
     teamLeaders:
-      "Scoring: Richard Hamilton 17.6 ppg. Chauncey Billups 16.9 ppg. Ben Wallace 12.4 rpg and 3.0 bpg — led the team in rebounds, blocks, and steals. Nobody averaged 18. The identity was defense: #2 in points allowed, held opponents under 70 points multiple times.",
+      "Scoring: the shooting guard at 17.6 ppg, the point guard at 16.9. The center averaged 12.4 rpg and 3.0 bpg and led the team in rebounds, blocks, and steals. Nobody averaged 18. The identity was defense: #2 in points allowed, held opponents under 70 points multiple times.",
     transactions:
-      "Traded for Rasheed Wallace at the February deadline in a three-team deal. Universally seen as the move that turned a good team into a champion.",
+      "Traded for a mercurial, technical-foul-prone power forward at the February deadline in a three-team deal. Universally seen as the move that turned a good team into a champion.",
   },
 
   vibes: {
@@ -123,7 +123,7 @@ export const dossier: Dossier = {
     techMarkers:
       "No YouTube, no Twitter, no Facebook for the public. Texting on T9. League Pass existed but highlights lived on SportsCenter, not your phone. If you missed the game, you actually missed it.",
     cityCulture:
-      "Blue-collar, proudly unglamorous. Auto plants, Motown records, coney dogs, Faygo and Vernors pop. Iced tea comes unsweetened — this is the North; ask for sweet tea and you'll get sugar packets and a look. The city's most famous musical export at the time was a white rapper whose movie about the city had just won an Oscar for its theme song.",
+      "Blue-collar, proudly unglamorous. Auto plants, a world-famous soul record label, coney dogs, Faygo and Vernors pop. Iced tea comes unsweetened — this is the North; ask for sweet tea and you'll get sugar packets and a look. The city's most famous musical export at the time was a white rapper whose movie about the city had just won an Oscar for its theme song.",
     climate:
       "Real winters — gray, long, snowy, lake-effect cold. Summers are warm and humid but nobody would call them crazy hot. You'd take the summers; the winters take you.",
     geography:

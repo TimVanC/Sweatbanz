@@ -1,8 +1,14 @@
-// Scripted play-through against a running dev server. Run: npx tsx scripts/playtest.ts <port>
+// Scripted play-through against a running dev server.
+// Run: npx tsx scripts/playtest.ts <port> [puzzleNumber]
+// The default question list is tuned for puzzle #1 (2003-04 Pistons); pass a
+// different number to watch the voice on another dossier (the final guess will
+// just be wrong, which exercises the loss path if you extend the list).
+import type { Turn } from "../lib/types";
+
 const port = process.argv[2] ?? "3000";
-import { randomUUID } from "node:crypto";
-const sessionId = randomUUID();
-const userKey = "playtest";
+const base = `http://localhost:${port}`;
+const number = process.argv[3] ? Number(process.argv[3]) : (await (await fetch(`${base}/api/puzzle`)).json()).number;
+
 const qs = [
   "Am I from the East?",
   "Did I win a title?",
@@ -23,17 +29,28 @@ const qs = [
   "Did I make a big trade during the season?",
   "Am I the 2004 Pistons?",
 ];
-(async () => {
-  for (const q of qs) {
-    const t0 = Date.now();
-    const res = await fetch(`http://localhost:${port}/api/ask`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId, userKey, question: q }),
-    });
-    const ms = Date.now() - t0;
-    const d = await res.json();
-    if (!res.ok) { console.log(`Q: ${q}\n   ERROR ${res.status}: ${d.error}\n`); continue; }
-    console.log(`Q: ${q}\n   [${d.kind}/${d.tone}/${ms}ms] #${d.questionCount} 💀${d.wrongGuesses}  ${d.text}${d.reveal ? "  ==> " + d.reveal.season + " " + d.reveal.team : ""}\n`);
+
+const history: Turn[] = [];
+console.log(`puzzle #${number}\n`);
+for (const q of qs) {
+  const t0 = Date.now();
+  const res = await fetch(`${base}/api/ask`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ number, question: q, history }),
+  });
+  const ms = Date.now() - t0;
+  const d = await res.json();
+  if (!res.ok) {
+    console.log(`Q: ${q}\n   ERROR ${res.status}: ${d.error}\n`);
+    if (res.status === 409) break;
+    continue;
   }
-})();
+  history.push({ question: q, response: { kind: d.kind, text: d.text, countsAsQuestion: d.countsAsQuestion, tone: d.tone } });
+  console.log(`Q: ${q}\n   [${d.kind}/${d.tone}/${ms}ms] #${d.questionCount} 💀${d.wrongGuesses}  ${d.text}`);
+  if (d.over) {
+    console.log(`   ==> ${d.won ? "WIN" : "LOSS"}: ${d.reveal.season} ${d.reveal.team}\n   closer: "${d.closer}"`);
+    break;
+  }
+  console.log();
+}
