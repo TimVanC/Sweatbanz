@@ -45,7 +45,7 @@ export function dossierForNumber(n: number): Dossier | null {
 export function nextPuzzleAt(now: Date = new Date()): Date {
   const today = localDate(now);
   // Walk forward in 15-minute steps until the local date flips, then snap back to the minute.
-  let t = now.getTime();
+  let t = Math.floor(now.getTime() / 60_000) * 60_000;
   while (localDate(new Date(t)) === today) t += 15 * 60_000;
   while (localDate(new Date(t - 60_000)) !== today) t -= 60_000;
   return new Date(t);
