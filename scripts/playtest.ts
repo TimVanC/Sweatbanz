@@ -1,6 +1,8 @@
 // Scripted play-through against a running dev server. Run: npx tsx scripts/playtest.ts <port>
 const port = process.argv[2] ?? "3000";
-const sessionId = "playtest-" + Date.now();
+import { randomUUID } from "node:crypto";
+const sessionId = randomUUID();
+const userKey = "playtest";
 const qs = [
   "Am I from the East?",
   "Did I win a title?",
@@ -27,7 +29,7 @@ const qs = [
     const res = await fetch(`http://localhost:${port}/api/ask`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId, question: q }),
+      body: JSON.stringify({ sessionId, userKey, question: q }),
     });
     const ms = Date.now() - t0;
     const d = await res.json();

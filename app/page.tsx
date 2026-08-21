@@ -28,12 +28,32 @@ const TONE_SQUARE: Record<string, string> = {
   guess_wrong: "🟥",
 };
 
+function uuid() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+      });
+}
+
+// Anonymous local identity (PRD: no auth in v1).
+function getUserKey(): string {
+  try {
+    const k = localStorage.getItem("sweatbanz:user");
+    if (k) return k;
+    const fresh = uuid();
+    localStorage.setItem("sweatbanz:user", fresh);
+    return fresh;
+  } catch {
+    return uuid();
+  }
+}
+
 export default function Home() {
-  const [sessionId] = useState(() =>
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : String(Math.random()).slice(2)
-  );
+  const [sessionId] = useState(uuid);
+  const [userKey, setUserKey] = useState<string>("");
+  const [puzzleNumber, setPuzzleNumber] = useState<number | null>(null);
   const [entries, setEntries] = useState<ChatEntry[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,6 +63,14 @@ export default function Home() {
   const [reveal, setReveal] = useState<{ team: string; season: string } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setUserKey(getUserKey());
+    fetch("/api/puzzle")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setPuzzleNumber(d.number))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -60,7 +88,7 @@ export default function Home() {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, question: text }),
+        body: JSON.stringify({ sessionId, userKey: userKey || getUserKey(), question: text }),
       });
       const data: AskResult = await res.json();
       if (!res.ok) {
@@ -110,6 +138,9 @@ export default function Home() {
           <div className="min-w-0">
             <h1 className="font-[family-name:var(--font-display)] text-2xl leading-none tracking-wide">
               SWEATBANZ
+              {puzzleNumber !== null && (
+                <span className="text-base opacity-80 ml-2">#{puzzleNumber}</span>
+              )}
             </h1>
             {reveal ? (
               <p className="text-sm font-bold truncate">
