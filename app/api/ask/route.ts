@@ -74,8 +74,8 @@ async function callModel(
 
 async function answer(dossier: Dossier, turns: Turn[], question: string, qCount: number, wrong: number): Promise<TurnResponse> {
   const system = buildSystemPrompt(dossier);
-  const history = buildHistory(turns);
-  const turnMsg = buildTurnMessage(question, qCount, wrong);
+  const history = buildHistory(turns, dossier);
+  const turnMsg = buildTurnMessage(question, qCount, wrong, dossier);
   let turn = await callModel(system, [...history, { role: "user", content: turnMsg }]);
 
   // Leak filter (skipped on a correct guess — the reveal is allowed).
