@@ -78,12 +78,20 @@ export function seasonCheck(question: string, dossier: Dossier): string {
     mentioned.push({ label: m[0], end: y, single: true });
   }
   if (mentioned.length === 0) return "[season check: the player did NOT name a year or season. If this is a guess, you may needle them for that.]";
+  // Direction is only useful (and only allowed) when they named the card's franchise.
+  const escapeRe = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const franchise = [dossier.team, ...dossier.aliases].some((a) =>
+    new RegExp("\\b" + escapeRe(a) + "\\b", "i").test(question)
+  );
+  if (!franchise) {
+    return `[season check: the player DID name a year (${mentioned.map((m) => m.label).join(", ")}) but not this card's franchise. Do NOT ask for a year and do NOT comment on the year, era, or decade in any way.]`;
+  }
   const parts = mentioned.map((m) => {
     const matches = m.single ? m.end === start || m.end === end : m.end === end;
     if (matches) return `${m.label} = matches the card's season`;
     return `${m.label} = ${m.end < end ? "EARLIER" : "LATER"} than the card's season`;
   });
-  return `[season check: the player DID name a year: ${parts.join("; ")}. Do NOT say they gave no year and do NOT ask for a year. Mention earlier/later ONLY if the franchise they named is the card's franchise — and only the word, never how many seasons.]`;
+  return `[season check: the player named this card's franchise AND a year: ${parts.join("; ")}. Do NOT ask for a year. If the season is wrong you may say only the one word earlier/later — never how many seasons off.]`;
 }
 
 export function buildTurnMessage(
